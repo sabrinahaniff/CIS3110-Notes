@@ -1,10 +1,4 @@
----
-title: 08 File Systems
-tags: [file-systems, inodes, directories, allocation]
-course: CIS3110
----
-
-# 08 File Systems
+# File Systems
 
 ## File Concept
 
@@ -179,9 +173,3 @@ Example: 754 = rwxr-xr--
 Device controller transfers data directly between device buffer and main memory without CPU copying each byte.
 
 **How CPU knows operation is complete**: Device controller generates an interrupt when block transfer completes.
-
-## Related Topics
-
-- [[07 Virtual Memory]]
-- [[06 Memory Management]]
-- [[02 Processes and Process Management]]
