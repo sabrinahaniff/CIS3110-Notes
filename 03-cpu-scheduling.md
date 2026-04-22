@@ -1,10 +1,4 @@
----
-title: 03 CPU Scheduling
-tags: [scheduling, fcfs, sjf, srtf, round-robin, priority]
-course: CIS3110
----
-
-# 03 CPU Scheduling
+# CPU Scheduling
 
 ## Overview
 
@@ -117,9 +111,3 @@ top -p <PID>
 | SRTF | Yes | Yes (avg wait) | Yes | Medium |
 | RR | Yes | No | No | High (context switches) |
 | Priority | Both | Depends | Yes | Medium |
-
-## Related Topics
-
-- [[01 Introduction to Operating Systems]]
-- [[02 Processes and Process Management]]
-- [[04 Process Synchronization]]
