@@ -1,10 +1,4 @@
----
-title: 04 Process Synchronization
-tags: [synchronization, semaphores, mutex, critical-section, race-conditions]
-course: CIS3110
----
-
-# 04 Process Synchronization
+# Process Synchronization
 
 ## Critical Section Problem
 
@@ -123,9 +117,3 @@ A monitor is a high-level synchronization construct that encapsulates:
 - Synchronization primitives
 
 Only one process can be active in the monitor at a time (automatic mutual exclusion).
-
-## Related Topics
-
-- [[03 CPU Scheduling]]
-- [[05 Deadlock]]
-- [[02 Processes and Process Management]]
