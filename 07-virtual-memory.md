@@ -1,10 +1,4 @@
----
-title: 07 Virtual Memory
-tags: [virtual-memory, page-replacement, lru, fifo, thrashing, demand-paging]
-course: CIS3110
----
-
-# 07 Virtual Memory
+# Virtual Memory
 
 ## Demand Paging
 
@@ -162,9 +156,3 @@ EAT must be < 1.1 × 200 = 220ns
 20 = 10,000,000 × p
 p < 0.000002 (one page fault per 500,000 accesses)
 ```
-
-## Related Topics
-
-- [[06 Memory Management]]
-- [[08 File Systems]]
-- [[03 CPU Scheduling]]
