@@ -1,10 +1,4 @@
----
-title: 06 Memory Management
-tags: [memory, paging, segmentation, page-tables, tlb]
-course: CIS3110
----
-
-# 06 Memory Management
+# Memory Management
 
 ## Address Binding
 
@@ -158,9 +152,3 @@ Combines benefits of both:
 - Pages eliminate external fragmentation
 
 Each segment has its own page table.
-
-## Related Topics
-
-- [[07 Virtual Memory]]
-- [[05 Deadlock]]
-- [[02 Processes and Process Management]]
