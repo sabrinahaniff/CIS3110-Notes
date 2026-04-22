@@ -184,14 +184,6 @@ rwx = 7, r-x = 5, r-- = 4
 Example: 755 = rwxr-xr-x
 ```
 
-## Exam Tips
-
-1. Draw diagrams for Gantt charts, state transitions, page tables
-2. Show all work for scheduling calculations
-3. Check for deadlock using resource allocation graphs
-4. Remember formulas for memory addressing
-5. Understand tradeoffs between algorithms
-
 ## Related Notes
 
 - [CPU Scheduling](03-cpu-scheduling.md)
