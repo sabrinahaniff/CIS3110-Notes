@@ -1,4 +1,4 @@
-# CIS3110 Operating Systems Notes
+# CIS*3110 Operating Systems Notes
 
 Comprehensive notes covering fundamental concepts of operating systems including processes, scheduling, synchronization, memory management, and file systems.
 
