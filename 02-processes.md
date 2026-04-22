@@ -1,10 +1,4 @@
----
-title: 02 Processes and Process Management
-tags: [processes, pcb, fork, exec, ipc, context-switching]
-course: CIS3110
----
-
-# 02 Processes and Process Management
+# Processes and Process Management
 
 ## Process Concept
 
@@ -159,8 +153,3 @@ A terminated process whose parent hasn't yet called wait() to read its exit stat
 
 A process whose parent has terminated. The init process (PID 1) adopts orphans.
 
-## Related Topics
-
-- [[01 Introduction to Operating Systems]]
-- [[03 CPU Scheduling]]
-- [[04 Process Synchronization]]
