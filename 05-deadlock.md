@@ -1,10 +1,4 @@
----
-title: 05 Deadlock
-tags: [deadlock, bankers-algorithm, prevention, avoidance, detection]
-course: CIS3110
----
-
-# 05 Deadlock
+# Deadlock
 
 ## Definition
 
@@ -123,9 +117,3 @@ P2: [6, 0, 0]
 ```
 
 **Safety check**: Find a safe sequence where each process can complete.
-
-## Related Topics
-
-- [[04 Process Synchronization]]
-- [[06 Memory Management]]
-- [[03 CPU Scheduling]]
