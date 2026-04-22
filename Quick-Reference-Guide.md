@@ -1,8 +1,3 @@
----
-title: Quick Reference Guide
-tags: [cheat-sheet, reference, quick-guide]
----
-
 # Operating Systems Quick Reference
 
 ## CPU Scheduling Algorithms
