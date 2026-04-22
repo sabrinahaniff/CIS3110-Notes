@@ -199,10 +199,10 @@ Example: 755 = rwxr-xr-x
 
 ## Related Notes
 
-- [CPU Scheduling](03-cpu-scheduling.md)
+- [CPU Scheduling](03-cpu-scheduling.md)]
 - [Process Synchronization](04-synchronization.md)
 - [Deadlock](05-deadlock.md)
 - [Memory Management](06-memory-management.md)
-- [[Virtual Memory](07-Virtual-Memory.md)
+- [Virtual Memory](07-Virtual-Memory.md)]
 
 Last Updated: April 2026
