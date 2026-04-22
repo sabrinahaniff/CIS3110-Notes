@@ -1,10 +1,5 @@
----
-title: 01 Introduction to Operating Systems
-tags: [operating-systems, introduction, system-calls, kernel]
-course: CIS3110
----
 
-# 01 Introduction to Operating Systems
+# Introduction to Operating Systems
 
 ## What is an Operating System?
 
@@ -112,6 +107,6 @@ kill <PID>
 
 ## Related Topics
 
-- [[02 Processes and Process Management]]
-- [[03 CPU Scheduling]]
-- [[04 Process Synchronization]]
+- [Processes](02-processes.md)
+- [CPU Scheduling](03-cpu-scheduling.md)
+- [Process Synchronization](04-synchronization.md)
