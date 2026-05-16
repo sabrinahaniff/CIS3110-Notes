@@ -3,12 +3,6 @@ site_description: Operating Systems notes from the University of Guelph
 site_author: Sabrina Haniff
 site_url: https://sabrinahaniff.github.io/CIS3110-Notes/
 
-docs_dir: .
-site_dir: site
-
-exclude_docs: |
-  site/
-
 theme:
   name: material
   palette:
@@ -42,12 +36,8 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
   - admonition
   - pymdownx.details
-  - attr_list
-  - md_in_html
   - tables
   - toc:
       permalink: true
