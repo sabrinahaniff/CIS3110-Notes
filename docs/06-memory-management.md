@@ -2,32 +2,68 @@
 
 ## Address Binding
 
-The process of mapping logical addresses to physical addresses can happen at different times:
+```mermaid
+flowchart LR
+    A["Source Code\n(symbolic addresses)"] -->|"compiler"| B["Object File\n(relocatable addresses)"]
+    B -->|"linker/loader"| C["Executable\n(logical addresses)"]
+    C -->|"MMU at runtime"| D["Physical Memory\n(physical addresses)"]
+
+    style D fill:#00897b,color:#fff
+```
+
+The process of mapping logical addresses to physical addresses can happen at:
 
 1. **Compile time**: Absolute code, addresses fixed at compile time
 2. **Load time**: Relocatable code, addresses fixed when loaded
-3. **Execution time**: Addresses can change during execution (requires hardware support - MMU)
+3. **Execution time**: Addresses can change during execution (requires MMU hardware)
+
+---
 
 ## Base and Limit Registers
 
-**Base register**: Holds the smallest legal physical address for a process  
-**Limit register**: Holds the size of the address space
+```mermaid
+flowchart LR
+    CPU["CPU generates\nlogical address"] --> CMP{"base <= addr\n< base+limit?"}
+    CMP -->|"Yes"| TRANS["Physical addr =\nlogical + base"]
+    CMP -->|"No"| TRAP["Trap to OS\n(segfault)"]
+    TRANS --> MEM["Access Memory"]
 
-**Protection**: For every memory access, hardware checks:
-```
-Is address >= base AND address < base + limit?
-If yes, allow access
-If no, trap to OS (segmentation fault)
+    style TRAP fill:#ef5350,color:#fff
+    style MEM fill:#00897b,color:#fff
 ```
 
-**Address translation**:
-```
-Physical address = Logical address + Base register value
-```
+- **Base register**: Smallest legal physical address
+- **Limit register**: Size of the address space
+- **Translation**: `Physical address = Logical address + Base`
+
+---
 
 ## Paging
 
-Divides physical memory into fixed-size blocks called **frames** and logical memory into blocks of the same size called **pages**.
+Divides physical memory into fixed-size **frames** and logical memory into **pages** of the same size.
+
+```mermaid
+flowchart LR
+    subgraph Logical Address
+        PN["Page Number (p)"] 
+        PO["Page Offset (d)"]
+    end
+
+    subgraph Page Table
+        PT["p → frame f"]
+    end
+
+    subgraph Physical Address
+        FN["Frame Number (f)"]
+        FO["Page Offset (d)"]
+    end
+
+    PN -->|"lookup"| PT
+    PT --> FN
+    PO --> FO
+
+    style PT fill:#1565c0,color:#fff
+```
 
 ### Benefits
 
@@ -35,38 +71,21 @@ Divides physical memory into fixed-size blocks called **frames** and logical mem
 - Allows non-contiguous allocation
 - Simplifies memory management
 
-### Page Table
+### Page Table Entry (PTE) contains:
 
-Maps logical page numbers to physical frame numbers.
-
-**Structure**:
-```
-Page Table Entry (PTE) contains:
 - Frame number
 - Valid/invalid bit
 - Protection bits (read/write/execute)
-- Reference bit (used for page replacement)
-- Modify/dirty bit (page has been written to)
+- Reference bit
+- Modify/dirty bit
+
+### Formulas
+
 ```
-
-### Address Translation
-
-**Logical address** divided into:
-- **Page number** (p): Index into page table
-- **Page offset** (d): Offset within the page
-
-**Physical address**:
-- **Frame number** (from page table[p])
-- **Page offset** (same as logical address offset)
-
-**Formulas**:
-```
-Page size = 2^(offset_bits)
-Number of pages = Logical address space / Page size
-Page table size = Number of pages × Entry size
-
-Logical address: | Page number (p) | Page offset (d) |
-Physical address: | Frame number (f) | Page offset (d) |
+Page size              = 2^(offset_bits)
+Number of pages        = Logical address space / Page size
+Page table size        = Number of pages × Entry size
+Physical address       = (frame number × page size) + page offset
 ```
 
 ### Example
@@ -76,74 +95,84 @@ Logical address space: 2^16 = 64K
 Page size: 2^10 = 1K
 Page offset bits: 10
 Page number bits: 16 - 10 = 6
-Number of pages: 2^6 = 64 pages
+Number of pages: 64
 
 Logical address 2500:
-Page number: 2500 / 1024 = 2
-Page offset: 2500 mod 1024 = 452
+  Page number: 2500 / 1024 = 2
+  Page offset: 2500 mod 1024 = 452
 
 If page table[2] = frame 6:
-Physical address = (1024 × 6) + 452 = 6596
+  Physical address = (1024 × 6) + 452 = 6596
 ```
+
+---
 
 ## Translation Lookaside Buffer (TLB)
 
 A small, fast cache for page table entries.
 
-**How it works**:
-1. CPU generates logical address
-2. Check TLB for page number
-3. If TLB hit: Get frame number immediately
-4. If TLB miss: Access page table in memory, update TLB
+```mermaid
+flowchart TD
+    CPU(["CPU generates\nlogical address"]) --> TLB{"Check TLB"}
+    TLB -->|"TLB Hit"| FAST["Get frame number\ndirectly"]
+    TLB -->|"TLB Miss"| PT["Access page table\nin memory"]
+    PT --> UPD["Update TLB"]
+    UPD --> FAST
+    FAST --> MEM(["Access physical memory"])
 
-**Effective Access Time**:
-```
-EAT = (TLB hit rate × TLB access time) + 
-      ((1 - TLB hit rate) × (TLB access time + Memory access time))
+    style TLB fill:#1565c0,color:#fff
+    style FAST fill:#00897b,color:#fff
+    style PT fill:#f57c00,color:#fff
 ```
 
-**Example**:
+**Effective Access Time:**
 ```
-TLB hit rate = 80%
-TLB access = 20ns
-Memory access = 100ns
+EAT = (hit_rate × TLB_time) + ((1 - hit_rate) × (TLB_time + mem_time))
 
-EAT = 0.8 × 20 + 0.2 × (20 + 100)
-    = 16 + 0.2 × 120
-    = 16 + 24
-    = 40ns
+Example:
+  TLB hit rate = 80%, TLB = 20ns, Memory = 100ns
+  EAT = 0.8×20 + 0.2×(20+100) = 16 + 24 = 40ns
 ```
+
+---
 
 ## Multi-level Paging
 
-For large address spaces, page tables become too large. Solution: hierarchical page tables.
+For large address spaces, page tables become too large. Use hierarchical page tables.
 
-**Two-level paging**:
-```
-Logical address: | Outer page | Inner page | Offset |
+```mermaid
+flowchart LR
+    LA["Logical Address\n| Outer | Inner | Offset |"] --> OPT["Outer Page Table"]
+    OPT --> IPT["Inner Page Table"]
+    IPT --> PA["Physical Address"]
 
-1. Use outer page number to index outer page table
-2. Get address of inner page table
-3. Use inner page number to index inner page table
-4. Get frame number
-5. Combine frame number + offset
+    style OPT fill:#1565c0,color:#fff
+    style IPT fill:#7c4dff,color:#fff
+    style PA fill:#00897b,color:#fff
 ```
+
+---
 
 ## Segmentation
 
 Divides memory into variable-size segments based on logical units (code, data, stack).
 
+```mermaid
+flowchart LR
+    LA["Logical Address\n| Segment | Offset |"] --> ST["Segment Table\n(base, limit)"]
+    ST --> CHK{"offset < limit?"}
+    CHK -->|"Yes"| PA["Physical =\nbase + offset"]
+    CHK -->|"No"| TRAP["Segfault!"]
+
+    style PA fill:#00897b,color:#fff
+    style TRAP fill:#ef5350,color:#fff
+```
+
 **Segment table** contains:
-- Base: Starting physical address of segment
-- Limit: Length of segment
+- **Base**: Starting physical address of segment
+- **Limit**: Length of segment
 
-**Address translation**:
-```
-Logical address: | Segment number | Offset |
-
-1. Check if offset < limit (protection)
-2. Physical address = base[segment] + offset
-```
+---
 
 ## Segmentation with Paging
 

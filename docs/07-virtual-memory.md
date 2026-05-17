@@ -2,157 +2,177 @@
 
 ## Demand Paging
 
-Pages are loaded into memory only when they are demanded during program execution.
+Pages are loaded into memory only when they are demanded during execution.
 
-**Benefits**:
+```mermaid
+flowchart LR
+    A(["Program starts"]) --> B["Only load pages\nthat are needed"]
+    B --> C{"Page accessed\nin memory?"}
+    C -->|"Yes (valid bit=1)"| D(["Access data normally"])
+    C -->|"No (valid bit=0)"| E["Page Fault!\nLoad from disk"]
+    E --> D
+
+    style E fill:#f57c00,color:#fff
+    style D fill:#00897b,color:#fff
+```
+
+**Benefits:**
 - Less I/O needed
 - Less memory needed
-- Faster response
+- Faster startup
 - More processes can run
 
-**Valid/Invalid bit**: Indicates whether a page is in memory or on disk.
+---
 
 ## Page Fault
 
-Occurs when a process tries to access a page not currently in memory.
+```mermaid
+flowchart TD
+    A(["Process accesses page"]) --> B{"Valid bit\nin page table?"}
+    B -->|"1 = in memory"| C(["Access data"])
+    B -->|"0 = not in memory"| D["OS trap:\npage fault handler"]
+    D --> E{"Free frame\navailable?"}
+    E -->|"Yes"| G["Load page\nfrom disk"]
+    E -->|"No"| F["Run page replacement\nalgorithm — evict a page"]
+    F --> G
+    G --> H["Update page table\nvalid bit = 1"]
+    H --> I(["Restart instruction"])
 
-**Steps when page fault occurs**:
-1. Check page table - page is marked invalid
-2. OS traps to page fault handler
-3. Find free frame (or evict a page if memory full)
-4. Read desired page from disk into frame
-5. Update page table
-6. Restart the instruction that caused the fault
+    style D fill:#f57c00,color:#fff
+    style F fill:#ef5350,color:#fff
+    style I fill:#00897b,color:#fff
+```
+
+---
 
 ## Page Replacement Algorithms
 
-When memory is full, must choose which page to evict.
-
 ### FIFO (First-In, First-Out)
 
-Replace the oldest page (first one brought into memory).
+Replace the **oldest** page in memory.
 
-**Advantage**: Simple to implement  
-**Disadvantage**: May replace frequently used pages, suffers from Belady's Anomaly
+```mermaid
+flowchart LR
+    A["Page arrives"] --> Q["Queue\n(oldest → newest)"]
+    Q -->|"memory full"| V["Evict oldest page"]
+    V --> Q
 
-**Belady's Anomaly**: Increasing the number of frames can sometimes increase page faults (FIFO only).
-
-**Example**:
+    style V fill:#ef5350,color:#fff
 ```
-Reference string: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
-Frames: 3
 
-Step 1: [1, -, -] Fault
-Step 2: [1, 2, -] Fault
-Step 3: [1, 2, 3] Fault
-Step 4: [4, 2, 3] Fault (replace 1)
-Step 5: [4, 2, 3] Hit
-Step 6: [4, 2, 3] Hit
-Step 7: [4, 2, 5] Fault (replace 3)
-...
-Total: 10 faults
-```
+!!! warning "Belady's Anomaly"
+    More frames can sometimes cause MORE page faults with FIFO!
+
+---
 
 ### Optimal (OPT)
 
-Replace the page that will not be used for the longest time in the future.
+Replace the page that will **not be used for the longest time** in the future.
 
-**Advantage**: Minimal page faults (theoretical optimum)  
-**Disadvantage**: Requires future knowledge - impossible to implement in practice
+- **Advantage**: Theoretical minimum page faults
+- **Disadvantage**: Requires future knowledge — impossible to implement
+- **Purpose**: Benchmark to compare other algorithms
 
-**Purpose**: Used as a benchmark to compare other algorithms.
+---
 
 ### LRU (Least Recently Used)
 
-Replace the page that has not been used for the longest time in the past.
+Replace the page **not used for the longest time in the past**.
 
-**Idea**: Use the past as a predictor of the future (locality of reference)
+```mermaid
+flowchart LR
+    A(["Page accessed"]) --> B["Move to\nmost-recent position"]
+    B --> C["Stack/list\n[most recent ... least recent]"]
+    C -->|"memory full"| D["Evict page\nat bottom (LRU)"]
 
-**Advantage**: Good approximation of OPT, performs well in practice  
-**Disadvantage**: Expensive to implement
-
-**Implementation options**:
-1. **Counter-based**: Every page gets a timestamp, updated on every reference. To evict, scan for smallest timestamp. Expensive - requires search on every fault.
-
-2. **Stack-based**: Keep a stack of page numbers. On every reference, move that page to the top. Bottom of stack is LRU page. No search needed, but updating stack on every access requires hardware support.
-
-**Example**:
+    style D fill:#ef5350,color:#fff
+    style C fill:#1565c0,color:#fff
 ```
-Reference string: 1, 2, 3, 1, 4, 1, 2, 3, 4, 2
-Frames: 3
 
-Step 1: [1, -, -] Fault
-Step 2: [1, 2, -] Fault
-Step 3: [1, 2, 3] Fault
-Step 4: [1, 2, 3] Hit (1 most recent)
-Step 5: [4, 2, 3] Fault (replace 1 - least recent)
-Step 6: [4, 2, 3] Hit
-Step 7: [4, 1, 3] Fault (replace 2)
-...
-Total: 7 faults
-```
+- **Advantage**: Good approximation of OPT
+- **Disadvantage**: Expensive to implement (needs hardware support)
+
+---
 
 ### Second Chance (Clock Algorithm)
 
-Approximation of LRU using a reference bit.
+Approximation of LRU using a **reference bit**.
 
-**How it works**:
-1. Pages arranged in circular queue (like a clock)
-2. Reference bit set to 1 when page is accessed (by hardware)
-3. Clock hand points to next candidate page
-4. If reference bit = 0, evict this page
-5. If reference bit = 1, give it a "second chance": set bit to 0, advance hand, check next page
-6. If all pages have reference bit = 1, go around the clock clearing all bits, then evict the page where you started
+```mermaid
+flowchart TD
+    A(["Need to evict a page"]) --> B{"Reference\nbit = 0?"}
+    B -->|"Yes"| C(["Evict this page"])
+    B -->|"No"| D["Set bit to 0\nGive second chance"]
+    D --> E["Advance clock hand\nto next page"]
+    E --> B
 
-**Advantage**: Simple, reasonably good performance  
-**Disadvantage**: Not as good as true LRU
+    style C fill:#ef5350,color:#fff
+    style D fill:#f57c00,color:#fff
+```
+
+---
+
+## Page Replacement Comparison
+
+| Algorithm | Faults | Implementable | Notes |
+|-----------|--------|---------------|-------|
+| OPT | Minimum | No | Theoretical benchmark |
+| LRU | Near OPT | Expensive | Best practical choice |
+| Second Chance | Good | Yes | LRU approximation |
+| FIFO | Worst | Yes | Belady's anomaly |
+
+---
 
 ## Frame Allocation
 
-How many frames should each process get?
-
 ### Equal Allocation
-
-Each process gets the same number of frames: m/n frames each (where m = total frames, n = number of processes)
+Each process gets `m/n` frames (m = total frames, n = processes)
 
 **Problem**: Ignores process size differences
 
 ### Proportional Allocation
 
-Each process gets frames proportional to its size.
-
-If process i has size s_i and total size S = sum of all s_i, then process i gets:
 ```
 frames_i = (s_i / S) × m
+
+where s_i = size of process i, S = total size, m = total frames
 ```
+
+---
 
 ## Thrashing
 
-A process is thrashing when it spends more time paging than executing.
+A process is **thrashing** when it spends more time paging than executing.
 
-**Cause**: Process doesn't have enough frames for its working set
+```mermaid
+flowchart LR
+    A["Too many processes\nrunning at once"] --> B["Each process has\ntoo few frames"]
+    B --> C["Constant page faults"]
+    C --> D["CPU busy handling\npage faults, not work"]
+    D --> E["CPU utilization drops"]
+    E -->|"OS thinks: add more processes!"| A
 
-**Working Set**: Set of pages a process is actively using
+    style C fill:#ef5350,color:#fff
+    style D fill:#ef5350,color:#fff
+```
 
-**Solution**:
+**Solution:**
 - Decrease degree of multiprogramming (run fewer processes)
 - Increase available memory
-- Use better page replacement algorithm
-- Increase process priority to get more frames
+- Use working set model
+
+---
 
 ## Effective Access Time with Paging
 
 ```
-Memory access time = 200ns
-Page fault service time = 10ms = 10,000,000ns
-Page fault rate = p
+Memory access time     = 200ns
+Page fault service     = 10ms = 10,000,000ns
+Page fault rate        = p
 
-EAT = (1 - p) × memory_access_time + p × page_fault_service_time
-EAT = (1 - p) × 200 + p × 10,000,000
+EAT = (1-p) × 200 + p × 10,000,000
 
-For 10% performance degradation:
-EAT must be < 1.1 × 200 = 220ns
-220 = 200 + 10,000,000 × p
-20 = 10,000,000 × p
-p < 0.000002 (one page fault per 500,000 accesses)
+For max 10% performance degradation:
+EAT < 220ns  →  p < 0.000002
+(one page fault per 500,000 accesses)
 ```

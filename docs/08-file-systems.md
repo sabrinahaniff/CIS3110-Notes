@@ -4,135 +4,148 @@
 
 A file is a named collection of related information stored on secondary storage.
 
-**Attributes**:
-- Name
-- Type
-- Location
-- Size
-- Protection (permissions)
-- Time, date, and user identification
+**Attributes:** Name, Type, Location, Size, Protection, Timestamps, Owner
 
-## File Operations
+**Operations:** Create, Write, Read, Seek, Delete, Truncate
 
-- Create
-- Write
-- Read
-- Reposition within file (seek)
-- Delete
-- Truncate
-
-## File Types
-
-- Regular files (text or binary)
-- Directories
-- Special files (devices)
+---
 
 ## Directory Structure
 
-### Single-Level Directory
+```mermaid
+flowchart TD
+    R["/\n(root)"] --> H["/home"]
+    R --> E["/etc"]
+    R --> U["/usr"]
+    H --> S["/home/sabrina"]
+    H --> B["/home/bob"]
+    S --> D["docs/"]
+    S --> F["notes.txt"]
+    D --> F2["report.pdf"]
 
-All files in one directory. Simple but no organization for multiple users.
+    style R fill:#7c4dff,color:#fff
+    style S fill:#1565c0,color:#fff
+```
 
-### Two-Level Directory
+- **Absolute path**: `/home/sabrina/notes.txt`
+- **Relative path**: `../bob/file.txt`
 
-Separate directory for each user. Solves name collision problem.
-
-### Tree-Structured Directory
-
-Most common. Hierarchical structure with arbitrary depth.
-
-**Path names**:
-- Absolute path: /home/user/file.txt
-- Relative path: ../other/file.txt
+---
 
 ## File Allocation Methods
 
 ### 1. Contiguous Allocation
 
-Each file occupies a set of contiguous blocks on disk.
+```mermaid
+flowchart LR
+    F["File\n(start=2, length=4)"] --> B2["Block 2"]
+    B2 --> B3["Block 3"]
+    B3 --> B4["Block 4"]
+    B4 --> B5["Block 5"]
 
-**Advantages**:
-- Simple - only starting location and length needed
-- Fast sequential access
-- Fast random access
+    style F fill:#1565c0,color:#fff
+    style B2 fill:#00897b,color:#fff
+    style B3 fill:#00897b,color:#fff
+    style B4 fill:#00897b,color:#fff
+    style B5 fill:#00897b,color:#fff
+```
 
-**Disadvantages**:
+- Fast sequential and random access
 - External fragmentation
-- Difficulty in growing files
+- Hard to grow files
 
 ### 2. Linked Allocation
 
-Each file is a linked list of disk blocks scattered anywhere on disk.
+```mermaid
+flowchart LR
+    F["File\n(start=2)"] --> B2["Block 2\ndata | next→5"]
+    B2 --> B5["Block 5\ndata | next→8"]
+    B5 --> B8["Block 8\ndata | next→NULL"]
 
-**Advantages**:
+    style F fill:#1565c0,color:#fff
+```
+
 - No external fragmentation
-- Files can grow easily
-
-**Disadvantages**:
 - Slow random access (must traverse list)
-- Space overhead for pointers
-- Reliability (if one link breaks, file is lost)
+- Pointer overhead
 
 ### 3. Indexed Allocation
 
-Brings all pointers together into an index block.
+```mermaid
+flowchart LR
+    F["File\n(index block=3)"] --> IB["Index Block 3\n[5, 8, 12, 17, ...]"]
+    IB --> B5["Block 5\ndata"]
+    IB --> B8["Block 8\ndata"]
+    IB --> B12["Block 12\ndata"]
 
-**Advantages**:
+    style IB fill:#f57c00,color:#fff
+    style F fill:#1565c0,color:#fff
+```
+
 - Fast random access
 - No external fragmentation
-
-**Disadvantages**:
 - Overhead of index block
-- What if file is larger than index block?
 
-**Solution for large files**: Multi-level indexing (similar to multi-level page tables)
+---
 
 ## Inodes (Unix/Linux)
 
-An inode (index node) contains file metadata and pointers to data blocks.
+```mermaid
+flowchart TD
+    I["Inode\n(metadata + pointers)"] --> DP["12 Direct Pointers\n→ data blocks directly\n(48KB with 4KB blocks)"]
+    I --> SP["Single Indirect\n→ block of pointers\n(4MB)"]
+    I --> DP2["Double Indirect\n→ block of single indirect\n(4GB)"]
+    I --> TP["Triple Indirect\n→ block of double indirect\n(4TB)"]
 
-**Inode structure**:
-- File metadata (permissions, owner, timestamps, size)
-- Direct pointers (typically 12) - point directly to data blocks
-- Single indirect pointer - points to a block of pointers
-- Double indirect pointer - points to a block of single indirect pointers
-- Triple indirect pointer - points to a block of double indirect pointers
+    DP --> DB1["Data Block"]
+    SP --> PB["Pointer Block"] --> DB2["Data Block"]
 
-**Maximum file size**: Determined by number of pointers and block size.
-
-**Example with 4KB blocks**:
+    style I fill:#7c4dff,color:#fff
+    style DP fill:#00897b,color:#fff
+    style SP fill:#1565c0,color:#fff
+    style DP2 fill:#f57c00,color:#fff
+    style TP fill:#ef5350,color:#fff
 ```
-12 direct pointers: 12 × 4KB = 48KB
-1 single indirect: 1K pointers × 4KB = 4MB
-1 double indirect: 1K × 1K pointers × 4KB = 4GB
-1 triple indirect: 1K × 1K × 1K pointers × 4KB = 4TB
+
+**Example with 4KB blocks:**
 ```
+12 direct:        12 × 4KB       =  48KB
+Single indirect:  1K × 4KB       =   4MB
+Double indirect:  1K × 1K × 4KB  =   4GB
+Triple indirect:  1K³ × 4KB      =   4TB
+```
+
+---
 
 ## Free Space Management
 
-### Bit Vector (Bitmap)
+| Method | How | Pros | Cons |
+|--------|-----|------|------|
+| Bitmap | 1 bit per block (0=free, 1=used) | Simple, find contiguous blocks | Extra space |
+| Linked list | Free blocks linked together | No waste | Slow traversal |
+| Grouping | Addresses of n free blocks stored in first free block | Efficient | Complex |
+| Counting | First free block + count of contiguous free blocks | Good for contiguous | More complex |
 
-Each block represented by 1 bit. 0 = free, 1 = allocated (or vice versa).
+---
 
-**Advantage**: Simple, easy to find contiguous blocks  
-**Disadvantage**: Requires extra space
+## File Permissions (Unix/Linux)
 
-### Linked List
+```
+rwxr-xr--
+|||
+||└─ Others:  r-- = 4
+|└── Group:   r-x = 5
+└─── Owner:   rwx = 7
 
-Free blocks linked together.
+Octal: 754
+```
 
-**Advantage**: No waste of space  
-**Disadvantage**: Slow to traverse
+**For files**: `x` means executable  
+**For directories**: `x` means can enter/traverse
 
-### Grouping
+---
 
-Store addresses of n free blocks in first free block. Last address points to another block containing addresses of free blocks.
-
-### Counting
-
-Store address of first free block and count of contiguous free blocks.
-
-## File System Commands
+## Useful Commands
 
 ```bash
 # List files with inodes
@@ -150,26 +163,18 @@ chmod 755 file     # rwxr-xr-x
 chown user file    # Change owner
 ```
 
-## File Permissions (Unix/Linux)
-
-```
-rwxr-xr--
-|||
-||└─ Others: read only
-|└── Group: read + execute
-└─── Owner: read + write + execute
-
-Octal notation:
-r = 4, w = 2, x = 1
-rwx = 7, r-x = 5, r-- = 4
-Example: 754 = rwxr-xr--
-```
-
-**For files**: x means executable
-**For directories**: x means can enter/traverse the directory
+---
 
 ## DMA (Direct Memory Access)
 
-Device controller transfers data directly between device buffer and main memory without CPU copying each byte.
+Device controller transfers data directly between device buffer and main memory — without the CPU copying each byte.
 
-**How CPU knows operation is complete**: Device controller generates an interrupt when block transfer completes.
+```mermaid
+flowchart LR
+    CPU(["CPU\ninitializes transfer"]) --> DC["Device Controller"]
+    DC -->|"Direct transfer\n(no CPU involved)"| MEM["Main Memory"]
+    DC -->|"Interrupt when\ncomplete"| CPU
+
+    style CPU fill:#7c4dff,color:#fff
+    style MEM fill:#00897b,color:#fff
+```
