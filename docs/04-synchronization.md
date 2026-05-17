@@ -156,6 +156,7 @@ sequenceDiagram
 ### Readers-Writers Problem
 
 **Rules:**
+
 - Multiple readers can read simultaneously
 - Only one writer can write at a time
 - No readers when a writer is writing
@@ -198,6 +199,7 @@ flowchart TD
 **Problem:** Deadlock if all philosophers pick up their left chopstick simultaneously.
 
 **Solutions:**
+
 1. Allow at most 4 philosophers to sit at the table
 2. Pick up chopsticks only if both are available (atomic)
 3. Asymmetric: odd philosophers pick up left first, even pick up right first

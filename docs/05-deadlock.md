@@ -68,7 +68,7 @@ Eliminate at least one of the four conditions:
 
 ---
 
-### 2. Avoidance — Banker's Algorithm
+### 2. Avoidance: Banker's Algorithm
 
 The system decides whether to grant a resource request based on whether it leads to a **safe state**.
 
