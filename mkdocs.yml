@@ -1,10 +1,13 @@
-site_name: CIS*3110 — Operating Systems
+site_name: CIS*3110 - Operating Systems
 site_description: Operating Systems notes from the University of Guelph
 site_author: Sabrina Haniff
 site_url: https://sabrinahaniff.github.io/CIS3110-Notes/
 
 theme:
   name: material
+  font:
+    text: Inter
+    code: JetBrains Mono
   palette:
     - scheme: default
       primary: teal
@@ -22,9 +25,12 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.indexes
     - search.highlight
     - search.suggest
+    - search.share
     - content.code.copy
+    - content.code.annotate
     - toc.follow
 
 plugins:
@@ -35,15 +41,29 @@ markdown_extensions:
       generic: true
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - admonition
   - pymdownx.details
+  - attr_list
+  - md_in_html
   - tables
   - toc:
       permalink: true
 
 extra_javascript:
-  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: README.md
