@@ -89,9 +89,9 @@ sequenceDiagram
 
 ### Types of Semaphores
 
-**Binary semaphore (mutex):** Values 0 or 1 — used for mutual exclusion
+**Binary semaphore (mutex):** Values 0 or 1: used for mutual exclusion
 
-**Counting semaphore:** Any non-negative value — used to manage a pool of resources
+**Counting semaphore:** Any non-negative value: used to manage a pool of resources
 
 ---
 
@@ -222,7 +222,7 @@ flowchart LR
     style LP fill:#f57c00,color:#fff
 ```
 
-**Deadlock**: A set of processes are waiting for each other in a cycle — none can proceed
+**Deadlock**: A set of processes are waiting for each other in a cycle - none can proceed
 
 **Starvation**: A process waits indefinitely because other processes keep getting priority
 
